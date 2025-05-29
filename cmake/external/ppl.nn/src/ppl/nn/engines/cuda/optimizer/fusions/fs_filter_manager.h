@@ -1,0 +1,78 @@
+// 2024 - Modified by MetaX Integrated Circuits (Shanghai) Co., Ltd. All Rights Reserved.
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
+#ifndef _ST_HPC_PPL_NN_ENGINES_CUDA_OPTIMIZER_ALGOS_FS_FILTER_MANAGER_H_
+#define _ST_HPC_PPL_NN_ENGINES_CUDA_OPTIMIZER_ALGOS_FS_FILTER_MANAGER_H_
+
+#include "ppl/nn/engines/cuda/optimizer/fusions/fusion.h"
+
+#include "ppl/nn/engines/cuda/optimizer/fusions/fs_averagepool.h"
+#include "ppl/nn/engines/cuda/optimizer/fusions/fs_channel_shuffle.h"
+#include "ppl/nn/engines/cuda/optimizer/fusions/fs_concat.h"
+#include "ppl/nn/engines/cuda/optimizer/fusions/fs_conv.h"
+#include "ppl/nn/engines/cuda/optimizer/fusions/fs_gemm.h"
+#include "ppl/nn/engines/cuda/optimizer/fusions/fs_convtranspose.h"
+#include "ppl/nn/engines/cuda/optimizer/fusions/fs_softmax.h"
+#include "ppl/nn/engines/cuda/optimizer/fusions/fs_batch_normalization.h"
+#include "ppl/nn/engines/cuda/optimizer/fusions/fs_instance_normalization.h"
+#include "ppl/nn/engines/cuda/optimizer/fusions/fs_cast.h"
+#include "ppl/nn/engines/cuda/optimizer/fusions/fs_transpose.h"
+#include "ppl/nn/engines/cuda/optimizer/fusions/fs_mul_add.h"
+#include "ppl/nn/engines/cuda/optimizer/fusions/fs_add_layernorm.h"
+#include "ppl/nn/engines/cuda/optimizer/fusions/fs_gathernd_reshape_concat.h"
+#include "ppl/nn/engines/cuda/optimizer/fusions/fs_batch_gemm.h"
+#include "ppl/nn/engines/cuda/optimizer/fusions/fs_gather_reshape_add.h"
+namespace ppl { namespace nn { namespace cuda {
+
+class FsFilterManager {
+public:
+    static FsFilterManager* Instance() {
+        static FsFilterManager mgr;
+        return &mgr;
+    }
+
+    Fusion* FindFusion(const std::string& kernel_type) const;
+    template <typename T>
+    void Register(const std::string& kernel_type, T& fusion_type);
+    void Remove(const std::string& kernel_type);
+
+private:
+    FsFilterManager();
+
+private:
+    std::map<std::string, Fusion*> type2fusion_;
+    AveragePoolFusion averagepool_fs_;
+    ConcatFusion_Set concat_fs_;
+    ChannelShuffleFusion channel_shuffle_fs_;
+    ConvFusion_Set conv_fs_;
+    GemmFusion_Set gemm_fs_;
+    ConvTransposeFusion convtranspose_fs_;
+    SoftmaxFusion softmax_fs_;
+    BatchNormalizationFusion batchnorm_fs_;
+    InstanceNormalizationFusion instancenorm_fs_;
+    CastFusion cast_fs_;
+    TransposeFusion transpose_fs_;
+    MulAddFusion mul_add_fs_;
+    AddLayerNormFusion add_layernorm_fs_;
+    GatherNDReshapeConcatFusion_Set gather_reshape_concat_fs_;
+    GatherReshapeAddFusion gather_reshape_add_fs_;
+};
+
+}}} // namespace ppl::nn::cuda
+
+#endif

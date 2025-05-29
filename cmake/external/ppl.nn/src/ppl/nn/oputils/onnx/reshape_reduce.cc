@@ -1,0 +1,102 @@
+// 2024 - Modified by MetaX Integrated Circuits (Shanghai) Co., Ltd. All Rights Reserved.
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
+#include "ppl/nn/oputils/onnx/reshape_reduce.h"
+#include "ppl/nn/runtime/tensor_impl.h"
+#include "ppl/nn/common/logger.h"
+using namespace ppl::common;
+
+namespace ppl { namespace nn { namespace onnx {
+
+RetCode ReshapeReduce(InputOutputInfo* info, const ir::Attr* arg) {
+    auto param = static_cast<const ReduceParam*>(arg);
+    auto x = info->GetInput<TensorImpl>(0)->GetShape();
+    auto y = info->GetOutput<TensorImpl>(0)->GetShape();
+
+    // check & prepare axes
+    if (param->axes.size() > x->GetDimCount()) {
+        LOG(DEBUG) << "ERROR: axis's count[" << param->axes.size() << "] > input[0]'s dim count[" << x->GetDimCount()
+                   << "].";
+        return RC_INVALID_VALUE;
+    }
+
+    std::vector<int64_t> fixed_axes;
+    const uint32_t dim_count = x->GetDimCount();
+    if(param->type != ReduceParam::ReduceSum) {
+        for(uint32_t i = 0; i < param->axes.size(); i++)
+            fixed_axes.push_back(param->axes[i]);
+    }else {
+        auto axes_data = info->GetInput<TensorImpl>(1)->GetBufferPtr<int64_t>();
+        if (axes_data != nullptr) {
+            std::vector<int64_t> axes_data_host(info->GetInput<TensorImpl>(1)->GetShape()->GetDim(0));
+            info->GetInput<TensorImpl>(1)->CopyToHost(axes_data_host.data());
+            for(uint32_t i = 0; i < info->GetInput<TensorImpl>(1)->GetShape()->GetDim(0); i++) {
+                fixed_axes.push_back(axes_data_host[i]);
+            }
+        }
+    }
+    
+    if (fixed_axes.empty()) { // empty axes means reduce all dimss
+        if(!param->noop_with_empty_axes) {
+            y->ReshapeAsScalar();
+            return RC_SUCCESS;
+        }else{
+            y->Reshape(x->GetDims(), x->GetDimCount());
+            return RC_SUCCESS;
+        }
+    }
+
+    for (uint32_t i = 0; i < fixed_axes.size(); i++) {
+        if (fixed_axes[i] >= (int)dim_count || fixed_axes[i] < -(int)dim_count) {
+            LOG(DEBUG) << "ERROR: fixed axes[" << i << "]'s value[" << fixed_axes[i] << "] is out of range["
+                       << -(int)dim_count << ", " << dim_count << "].";
+            return RC_INVALID_VALUE;
+        }
+        if (fixed_axes[i] < 0) { // turn negative axes to positive axes
+            fixed_axes[i] = fixed_axes[i] + dim_count;
+        }
+    }
+
+    if (x->GetRealDimCount() == 0) {
+        return RC_UNSUPPORTED;
+    }
+
+    // reshape
+    y->Reshape(x->GetDims(), x->GetDimCount());
+    if (param->keepdims) {
+        for (uint32_t a = 0; a < fixed_axes.size(); ++a) {
+            y->SetDim(fixed_axes[a], 1);
+        }
+    } else {
+        for (uint32_t a = 0; a < fixed_axes.size(); ++a) {
+            y->SetDim(fixed_axes[a] - a, 0);
+            for (size_t i = fixed_axes[a] + 1; i < x->GetDimCount(); ++i) {
+                y->SetDim(i - a - 1, x->GetDim(i));
+            }
+            y->SetDimCount(y->GetDimCount() - 1);
+        }
+        if (y->GetDimCount() == 0) {
+            y->ReshapeAsScalar();
+        }
+    }
+    y->CalcPadding();
+
+    return RC_SUCCESS;
+}
+
+}}} // namespace ppl::nn::onnx

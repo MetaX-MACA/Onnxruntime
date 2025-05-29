@@ -1,0 +1,26 @@
+The following files may have been Modified by MetaX Integrated Circuits (Shanghai) Co., Ltd. in 2024. 
+
+__init__.py
+ppq/IR/base/command.py
+ppq/IR/base/graph.py
+ppq/IR/base/opdef.py
+ppq/IR/morph.py
+ppq/IR/quantize.py
+ppq/IR/training.py
+ppq/api/interface.py
+ppq/core/__init__.py
+ppq/core/common.py
+ppq/core/defs.py
+ppq/core/ffi.py
+ppq/core/quant.py
+ppq/executor/op/torch/default.py
+ppq/executor/torch.py
+ppq/parser/onnx_exporter.py
+ppq/quantization/analyse/graphwise.py
+ppq/quantization/analyse/layerwise.py
+ppq/quantization/analyse/util/__init__.py
+ppq/quantization/optim/calibration.py
+ppq/quantization/optim/parameters.py
+ppq/quantization/optim/refine.py
+ppq/quantization/optim/training.py
+ppq/quantization/quantizer/MetaxQuantizer.py

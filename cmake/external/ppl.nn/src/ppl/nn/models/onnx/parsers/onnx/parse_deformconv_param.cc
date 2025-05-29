@@ -1,0 +1,66 @@
+// 2024 - Modified by MetaX Integrated Circuits (Shanghai) Co., Ltd. All Rights Reserved.
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
+#include "ppl/nn/params/onnx/auto_pad_type.h"
+#include "ppl/nn/models/onnx/parsers/onnx/parse_deformconv_param.h"
+#include "ppl/nn/models/onnx/utils.h"
+#include "ppl/nn/common/logger.h"
+using namespace std;
+using namespace ppl::common;
+
+namespace ppl { namespace nn { namespace onnx {
+
+RetCode ParseDeformConvParam(const ::onnx::NodeProto& pb_node, const ParamParserExtraArgs& args, ir::Node*, ir::Attr* arg) {
+    auto param = static_cast<DeformConvParam*>(arg);
+
+    utils::GetNodeAttr(pb_node, "groups", &param->groups, 1);
+    utils::GetNodeAttr(pb_node, "deform_groups", &param->deform_groups, 1);
+    
+    utils::GetNodeAttr(pb_node, "kernel_shape", &param->kernel_shape);
+    utils::GetNodeAttr(pb_node, "dilations", &param->dilations);
+    utils::GetNodeAttr(pb_node, "strides", &param->strides);
+    utils::GetNodeAttr(pb_node, "pads", &param->pads);
+
+    uint32_t kernel_dims = param->kernel_shape.size();
+    if (kernel_dims == 0) {
+        LOG(ERROR) << "`kernel_shape` is empty.";
+        return RC_INVALID_VALUE;
+    }
+
+    // if empty, set to default value
+    if (param->dilations.size() == 0) {
+        param->dilations.resize(kernel_dims, 1);
+    }
+
+    if (param->strides.size() == 0) {
+        param->strides.resize(kernel_dims, 1);
+    }
+    if (param->pads.size() == 0) {
+        param->pads.resize(kernel_dims * 2, 0);
+    }
+
+    if (param->dilations.size() != kernel_dims || param->strides.size() != kernel_dims ||
+        param->pads.size() != kernel_dims * 2) {
+        LOG(ERROR) << "`pads`'s size[" << param->pads.size() << "] != kernel_shape's size[" << kernel_dims << "] * 2";
+        return RC_INVALID_VALUE;
+    }
+
+    return RC_SUCCESS;
+}
+
+}}} // namespace ppl::nn::onnx

@@ -1,0 +1,101 @@
+option(PPLNN_ENABLE_CUDA_JIT "enable cuda JIT support" ON)
+option(PPLNN_USE_MACA "" ON)
+
+set(TMP_CMAKE_CUDA_FLAGS ${CMAKE_CUDA_FLAGS})
+set(CMAKE_CUDA_FLAGS "")
+if(CUDA_VERSION VERSION_GREATER_EQUAL "10.2")
+    set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -forward-unknown-to-host-compiler")
+endif()
+
+if(PPLNN_USE_MACA)
+    set(CMAKE_CUDA_COMPILER_FORCED TRUE)
+    set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -mllvm -override-block-size=1024")
+endif()
+
+if(PPLNN_USE_MACA)
+    set(CMAKE_CUDA_COMPILER_FORCED TRUE)
+    set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS}")
+endif()
+
+include(${CMAKE_CURRENT_SOURCE_DIR}/deps/hpcc/cmake/cuda-common.cmake)
+
+if(CUDA_VERSION VERSION_LESS "9.0")
+    message(FATAL_ERROR "cuda verson [${CUDA_VERSION}] < min required [9.0]")
+elseif(CUDA_VERSION VERSION_LESS "10.2")
+    message(WARNNING " strongly recommend cuda >= 10.2, now is [${CUDA_VERSION}]")
+endif()
+
+# ----- #
+
+if(PPLNN_USE_MSVC_STATIC_RUNTIME)
+    hpcc_cuda_use_msvc_static_runtime()
+endif()
+
+file(GLOB __PPLNN_CUDA_SRC__ ${CMAKE_CURRENT_SOURCE_DIR}/src/ppl/nn/engines/cuda/*.cc)
+if(PPLNN_SOURCE_EXTERNAL_CUDA_ENGINE_SOURCES)
+    list(REMOVE_ITEM __PPLNN_CUDA_SRC__ ${CMAKE_CURRENT_SOURCE_DIR}/src/ppl/nn/engines/cuda/default_register_resources.cc)
+endif()
+
+file(GLOB_RECURSE __PPLNN_CUDA_SRC_RECURSE__
+    src/ppl/nn/engines/cuda/kernels/*.cc
+    src/ppl/nn/engines/cuda/optimizer/*.cc
+    src/ppl/nn/engines/cuda/params/*.cc
+    src/ppl/nn/engines/cuda/pmx/*.cc)
+
+if(PPLNN_ENABLE_CUDA_JIT)
+file(GLOB_RECURSE __PPLNN_CUDA_MODULE_SRC_RECURSE__
+    src/ppl/nn/engines/cuda/module/*.cc)
+    list(APPEND __PPLNN_CUDA_SRC_RECURSE__ ${__PPLNN_CUDA_MODULE_SRC_RECURSE__})
+    unset(__PPLNN_CUDA_MODULE_SRC_RECURSE__)
+endif()
+
+add_library(pplnn_cuda_static STATIC
+    ${__PPLNN_CUDA_SRC__}
+    ${__PPLNN_CUDA_SRC_RECURSE__}
+    ${PPLNN_SOURCE_EXTERNAL_CUDA_ENGINE_SOURCES})
+unset(__PPLNN_CUDA_SRC_RECURSE__)
+unset(__PPLNN_CUDA_SRC__)
+
+hpcc_populate_dep(ppl.kernel.cuda)
+if(PPLNN_USE_MACA)
+    if(PPLNN_USE_DNN)
+        target_link_libraries(pplnn_cuda_static PUBLIC
+            pplnn_basic_static pplkernelcuda_static mcdnn mcblas mcblasLt ${PPLNN_SOURCE_EXTERNAL_CUDA_LINK_LIBRARIES})
+    else()
+        target_link_libraries(pplnn_cuda_static PUBLIC
+            pplnn_basic_static pplkernelcuda_static mcblas ${PPLNN_SOURCE_EXTERNAL_CUDA_LINK_LIBRARIES})
+    endif()
+else()
+    if(PPLNN_USE_DNN)
+        target_link_libraries(pplnn_cuda_static PUBLIC
+            pplnn_basic_static pplkernelcuda_static cudnn cublas ${PPLNN_SOURCE_EXTERNAL_CUDA_LINK_LIBRARIES})
+    else()
+        target_link_libraries(pplnn_cuda_static PUBLIC
+            pplnn_basic_static pplkernelcuda_static cublas ${PPLNN_SOURCE_EXTERNAL_CUDA_LINK_LIBRARIES})
+    endif()
+endif()
+
+target_include_directories(pplnn_cuda_static PRIVATE
+    ${rapidjson_SOURCE_DIR}/include)
+target_compile_definitions(pplnn_cuda_static PUBLIC
+    PPLNN_USE_CUDA
+    PPLNN_CUDACC_VER_MAJOR=${CUDA_VERSION_MAJOR}
+    PPLNN_CUDACC_VER_MINOR=${CUDA_VERSION_MINOR})
+if(PPLNN_USE_MACA)
+    target_compile_definitions(pplnn_cuda_static PUBLIC
+        PPLNN_USE_MACA)
+endif()
+if(PPLNN_USE_DNN)
+    target_include_directories(pplnn_cuda_static PRIVATE
+        ${rapidjson_SOURCE_DIR}/include)
+    target_compile_definitions(pplnn_cuda_static PUBLIC
+        PPLNN_USE_DNN)
+endif()
+target_link_libraries(pplnn_static INTERFACE pplnn_cuda_static)
+
+if(PPLNN_INSTALL)
+    install(DIRECTORY include/ppl/nn/engines/cuda DESTINATION include/ppl/nn/engines)
+    install(TARGETS pplnn_cuda_static DESTINATION lib)
+endif()
+
+set(CMAKE_CUDA_FLAGS ${TMP_CMAKE_CUDA_FLAGS})

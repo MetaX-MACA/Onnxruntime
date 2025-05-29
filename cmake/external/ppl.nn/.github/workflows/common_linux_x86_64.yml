@@ -1,0 +1,47 @@
+name: common-linux-x86-64
+
+on:
+  #push:
+  #  branches: [ master ]
+  #  paths-ignore: ['.**', 'docker/**', 'docs/**', 'samples/**', README.md]
+  pull_request:
+    branches: [ master ]
+    paths-ignore: ['.**', 'docker/**', 'docs/**', 'samples/**', README.md,
+                   'cmake/arm.cmake', 'cmake/cuda.cmake', 'cmake/riscv.cmake',
+                   'include/ppl/nn/engines/arm/**', 'src/ppl/nn/engines/arm/**',
+                   'include/ppl/nn/engines/cuda/**', 'src/ppl/nn/engines/cuda/**',
+                   'include/ppl/nn/engines/riscv/**', 'src/ppl/nn/engines/riscv/**']
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}--${{ github.head_ref || github.run_id }}--${{ github.ref }}--${{ github.event_name }}
+  cancel-in-progress: true
+
+jobs:
+  build_and_test:
+    runs-on: [self-hosted, linux, dev-x86]
+
+    steps:
+      - name: Create Checkout Directory
+        run: |
+          echo "Create Checkout Directory: ${{ github.run_id }}."
+          [ -z "${{ github.run_id }}" ] || rm -rf ${{ github.run_id }}
+          mkdir ${{ github.run_id }}
+
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          path: ${{ github.run_id }}
+
+      - name: Build
+        run: |
+          cd ../../ && ./build_pplnn.sh ${{ github.run_id }} x86_64
+
+      - name: Test
+        run: |
+          cd ../../ && ./test_pplnn.sh ${{ github.run_id }} x86_64
+
+      - name: cleanup
+        if: ${{ always() }}
+        run: |
+          cd ../../ && ./clean_pplnn.sh ${{ github.run_id }}

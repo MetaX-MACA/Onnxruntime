@@ -1,0 +1,13 @@
+include maca_quantizer/ppq_/ppq/parser/caffe/*
+include maca_quantizer/ppq_/ppq/csrc/cuda/*
+include maca_quantizer/ppq_/ppq/csrc/build/readme.md
+include maca_quantizer/ppq_/ppq/csrc/cpu/*
+include maca_quantizer/ppq_/ppq/csrc/export.cc
+
+include README.md
+include requirements.txt
+include quantize.yaml
+
+prune script/
+prune sample/
+prune */__pycache__

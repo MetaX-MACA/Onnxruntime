@@ -1,0 +1,69 @@
+// 2024 - Modified by MetaX Integrated Circuits (Shanghai) Co., Ltd. All Rights Reserved.
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
+#ifndef _ST_HPC_PPL_NN_ENGINES_CUDA_PARAMS_CONV_EXTRA_PARAM_H_
+#define _ST_HPC_PPL_NN_ENGINES_CUDA_PARAMS_CONV_EXTRA_PARAM_H_
+
+#define QUANT_CONV_FORWARD_ALL_USE_FUSE_API 1
+
+#include "ppl/nn/engines/cuda/cuda_device.h"
+#include "ppl/nn/oputils/onnx/reshape_conv.h"
+#include "ppl/nn/params/onnx/leaky_relu_param.h"
+#include "cudakernel/nn/conv/conv_fp16.h"
+#include "cudakernel/nn/conv/depthwise.h"
+#include "cudakernel/nn/conv/group_padding.h"
+
+#include <float.h>
+
+using namespace ppl::common;
+
+namespace ppl { namespace nn { namespace cuda {
+
+typedef algo_param_t ConvAlgoInfo;
+typedef fuse_info_t ConvFusionInfo;
+
+struct CudaClipParam {
+    float min_value = -FLT_MAX;
+    float max_value = FLT_MAX;
+};
+
+struct ConvExtraParam {
+    ConvAlgoInfo algo_info;
+    ConvFusionInfo fuse_info;
+    bool is_initializer_weight = false;
+    bool bias_term = false;
+    bool is_graph_input_conv = false;
+};
+
+struct CudaConvParam final {
+    ppl::nn::onnx::ConvParam param;
+    ConvExtraParam extra_param;
+};
+float cpu_half2float(unsigned short x);
+int GetRelueType(const std::string& name);
+
+ppl::common::RetCode ConvertToForwardConvParam(const TensorShape& shape_in0, const TensorShape& shape_in1,
+                                               const TensorShape& shape_out, const CudaConvParam& cuda_param,
+                                               conv_param_t& conv_param);
+
+ppl::common::RetCode ConvertToForwardFuseParam(InputOutputInfo* info, CudaDevice* devive,
+                                               const ConvFusionInfo& fuse_info, fuse_param_t& fuse_param);
+
+}}} // namespace ppl::nn::cuda
+
+#endif

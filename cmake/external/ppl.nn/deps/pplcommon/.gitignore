@@ -1,0 +1,10 @@
+deps
+target
+log
+.vscode
+install
+build
+ocl-build
+ocl_x86-build
+ocl_aarch64-build
+

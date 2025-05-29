@@ -1,0 +1,21 @@
+import_model: /workspace/source/models/resnet50.onnx
+export_model: /workspace/source/models/resnet50_int8.onnx
+# mix_quantize: True
+
+
+dataset:
+  calib_dir: /ai_mirror/Datasets/modelzoo-data/classification_data/val
+  calib_num: 100
+  batch_size: 8
+  preprocessing:
+    enable: true
+    type: preprocess_v1
+    attributes:
+      isreverse: True
+      mean: [123.67, 116.28, 103.53]
+      std: [58.4, 57.12, 57.37]
+      resize:
+        keep_ratio: False
+        to: [3, 256, 256]
+        centercrop: [224,224]
+

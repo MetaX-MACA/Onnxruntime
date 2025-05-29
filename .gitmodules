@@ -1,0 +1,83 @@
+[submodule "cmake/external/protobuf"]
+        path = cmake/external/protobuf
+        url = ssh://gerrit.metax-internal.com:29418/external/protobuf.git
+[submodule "cmake/external/googletest"]
+        path = cmake/external/googletest
+        url = ssh://gerrit.metax-internal.com:29418/external/googletest.git
+[submodule "cmake/external/googlebenchmark"]
+        path = cmake/external/googlebenchmark
+        url = ssh://gerrit.metax-internal.com:29418/external/benchmark.git
+[submodule "cmake/external/onnx"]
+        path = cmake/external/onnx
+        url = ssh://gerrit.metax-internal.com:29418/external/onnx
+[submodule "cmake/external/date"]
+        path = cmake/external/date
+        url = ssh://gerrit.metax-internal.com:29418/external/date.git
+[submodule "cmake/external/nsync"]
+        path = cmake/external/nsync
+        url = ssh://gerrit.metax-internal.com:29418/external/nsync
+[submodule "cmake/external/re2"]
+        path = cmake/external/re2
+        url = ssh://gerrit.metax-internal.com:29418/external/re2.git
+[submodule "cmake/external/eigen"]
+        path = cmake/external/eigen
+        url = ssh://gerrit.metax-internal.com:29418/external/eigen.git
+[submodule "cmake/external/cxxopts"]
+        path = cmake/external/cxxopts
+        url = ssh://gerrit.metax-internal.com:29418/external/cxxopts.git
+[submodule "cmake/external/tensorboard"]
+        path = cmake/external/tensorboard
+        url = ssh://gerrit.metax-internal.com:29418/external/tensorboard.git
+[submodule "cmake/external/mimalloc"]
+        path = cmake/external/mimalloc
+        url = ssh://gerrit.metax-internal.com:29418/external/mimalloc.git
+[submodule "cmake/external/cub"]
+        path = cmake/external/cub
+        url = ssh://gerrit.metax-internal.com:29418/external/cub.git
+[submodule "cmake/external/wil"]
+        path = cmake/external/wil
+        url = ssh://gerrit.metax-internal.com:29418/external/wil
+[submodule "cmake/external/json"]
+        path = cmake/external/json
+        url = ssh://gerrit.metax-internal.com:29418/external/json
+[submodule "cmake/external/libprotobuf-mutator"]
+        path = cmake/external/libprotobuf-mutator
+        url = ssh://gerrit.metax-internal.com:29418/external/libprotobuf-mutator.git
+[submodule "cmake/external/flatbuffers"]
+        path = cmake/external/flatbuffers
+        url = ssh://gerrit.metax-internal.com:29418/external/flatbuffers.git
+[submodule "cmake/external/SafeInt/safeint"]
+        path = cmake/external/SafeInt/safeint
+        url = ssh://gerrit.metax-internal.com:29418/external/SafeInt.git
+[submodule "cmake/external/mp11"]
+        path = cmake/external/mp11
+        url = ssh://gerrit.metax-internal.com:29418/external/mp11.git
+[submodule "cmake/external/dlpack"]
+        path = cmake/external/dlpack
+        url = ssh://gerrit.metax-internal.com:29418/external/dlpack.git
+[submodule "cmake/external/emsdk"]
+        path = cmake/external/emsdk
+        url = ssh://gerrit.metax-internal.com:29418/external/emsdk.git
+        branch = 3.1.3
+[submodule "cmake/external/onnxruntime-extensions"]
+        path = cmake/external/onnxruntime-extensions
+        url = ssh://gerrit.metax-internal.com:29418/PDE/AI/onnxruntime-extensions.git
+[submodule "cmake/external/pytorch_cpuinfo"]
+        path = cmake/external/pytorch_cpuinfo
+        url = ssh://gerrit.metax-internal.com:29418/external/cpuinfo.git
+[submodule "cmake/external/onnx-tensorrt"]
+        path = cmake/external/onnx-tensorrt
+        url = ssh://gerrit.metax-internal.com:29418/external/onnx-tensorrt.git
+        branch = 8.2-GA
+[submodule "tools/python/macaQuantizer/maca_quantizer/ppq_"]
+	path = tools/python/macaQuantizer/maca_quantizer/ppq_
+	url = ssh://gerrit.metax-internal.com:29418/PDE/AI/ppq.git
+[submodule "cmake/external/ppl.nn"]
+	path = cmake/external/ppl.nn
+	url = ssh://gerrit.metax-internal.com:29418/PDE/AI/ppl.nn.git
+[submodule "cmake/external/abseil-cpp"]
+	path = cmake/external/abseil-cpp
+	url = ssh://gerrit.metax-internal.com:29418/external/abseil-cpp.git
+[submodule "cmake/external/pybind11"]
+	path = cmake/external/pybind11
+	url = ssh://gerrit.metax-internal.com:29418/external/pybind11.git

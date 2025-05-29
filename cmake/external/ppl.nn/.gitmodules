@@ -1,0 +1,12 @@
+[submodule "deps/pplcommon"]
+	path = deps/pplcommon
+	url = ssh://gerrit.metax-internal.com:29418/PDE/AI/ppl.common.git
+[submodule "deps/ppl.kernel.cuda"]
+	path = deps/ppl.kernel.cuda
+	url = ssh://gerrit.metax-internal.com:29418/PDE/AI/ppl.kernel.cuda.git
+[submodule "deps/hpcc"]
+	path = deps/hpcc
+	url = ssh://gerrit.metax-internal.com:29418/PDE/AI/hpcc.git
+[submodule "deps/rapidjson"]
+	path = deps/rapidjson
+	url = ssh://gerrit.metax-internal.com:29418/external/rapidjson.git

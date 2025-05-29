@@ -1,0 +1,21 @@
+#/bin/bash
+
+set -e
+
+do_ldconfig() {
+    echo /opt/maca-ai/onnxruntime-maca/lib > /etc/ld.so.conf.d/libonnxruntime-maca.conf && ldconfig
+}
+
+case "$1" in
+   configure)
+       do_ldconfig
+   ;;
+   abort-upgrade|abort-remove|abort-deconfigure)
+       echo "$1"
+   ;;
+   *)
+       exit 0
+   ;;
+esac
+
+echo "onnxruntime-maca package installed successfully"

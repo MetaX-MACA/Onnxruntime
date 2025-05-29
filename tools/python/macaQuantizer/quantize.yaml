@@ -1,0 +1,45 @@
+import_model: /ai_mirror//Models/modelzoo/modelzoo1.0/classification/ox_resnet50/resnet50.onnx
+export_model: /workspace/source/models/resnet50_int8.onnx
+
+force_advance_quant: True
+quant_algorithm: percentile
+collecting_device: gpu
+without_bs: False
+dispatch: conservative
+export_batch: 1
+export_type: onnx
+optimize_level: 2
+
+dataset:
+  calib_dir: /ai_mirror/Datasets/modelzoo-data/classification_data/val
+  calib_num: 64
+  batch_size: 8
+  preprocessing:
+    enable: true
+    # type: PreprocessV2
+    # path: ./tests/preprocess_v2.py
+    attributes:
+      isreverse: true
+      mean: [123.67, 116.28, 103.53]
+      std: [58.4, 57.12, 57.37]
+      resize:
+        keep_ratio: false
+        to: [3, 256, 256]
+        centercrop: [224,224]
+    
+
+optimize:
+  hybrid:
+    enable: False
+    ops: [Conv_13, Conv_22, Add_67]
+
+  training: 
+    lr: 3e-5
+    steps: 500
+
+  equalization:
+    enable: False
+    type: layerwise   # [layerwise, ssd]
+  
+  align_elementwise: true
+  align_concat: true

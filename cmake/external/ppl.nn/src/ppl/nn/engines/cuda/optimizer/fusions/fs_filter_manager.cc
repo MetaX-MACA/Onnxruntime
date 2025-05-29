@@ -1,0 +1,65 @@
+// 2024 - Modified by MetaX Integrated Circuits (Shanghai) Co., Ltd. All Rights Reserved.
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
+#include "ppl/nn/engines/cuda/optimizer/fusions/fs_filter_manager.h"
+
+using namespace std;
+using namespace ppl::common;
+
+namespace ppl { namespace nn { namespace cuda {
+
+Fusion* FsFilterManager::FindFusion(const std::string& kernel_type) const {
+    auto ref = type2fusion_.find(kernel_type);
+    if (ref == type2fusion_.end()) {
+        return nullptr;
+    }
+    return ref->second;
+}
+
+template <typename T>
+void FsFilterManager::Register(const std::string& kernel_type, T& fusion_type) {
+    type2fusion_.emplace(kernel_type, &fusion_type);
+}
+
+void FsFilterManager::Remove(const std::string& kernel_type) {
+    type2fusion_.erase(kernel_type);
+}
+
+FsFilterManager::FsFilterManager() {
+    type2fusion_.emplace("AveragePool", &averagepool_fs_);
+    type2fusion_.emplace("Concat", &concat_fs_);
+    type2fusion_.emplace("Conv", &conv_fs_);
+    type2fusion_.emplace("Gemm", &gemm_fs_);
+    type2fusion_.emplace("MatMul", &gemm_fs_);
+    type2fusion_.emplace("ConvTranspose", &convtranspose_fs_);
+    //type2fusion_.emplace("Reshape", &channel_shuffle_fs_);
+    type2fusion_.emplace("Softmax", &softmax_fs_);
+    type2fusion_.emplace("BatchNormalization", &batchnorm_fs_);
+    type2fusion_.emplace("InstanceNormalization", &instancenorm_fs_);
+    type2fusion_.emplace("GroupNormalization", &instancenorm_fs_);
+    type2fusion_.emplace("Cast", &cast_fs_);
+    type2fusion_.emplace("Transpose", &transpose_fs_);
+    type2fusion_.emplace("Reshape", &transpose_fs_);
+    type2fusion_.emplace("Mul", &mul_add_fs_);
+    type2fusion_.emplace("Add", &add_layernorm_fs_);
+    type2fusion_.emplace("GatherND", &gather_reshape_concat_fs_);
+    type2fusion_.emplace("Gather", &gather_reshape_add_fs_);
+
+}
+
+}}} // namespace ppl::nn::cuda

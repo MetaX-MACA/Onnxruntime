@@ -1,0 +1,10 @@
+numpy>=1.19.5
+onnx==1.12.0
+onnxruntime-gpu
+onnxoptimizer==0.2.7
+rich<=12.0.0
+packaging>=21.3
+pyyaml>=6.0
+h5py>=2.10.0
+wrapt>1.11.0,<1.15
+onnxsim

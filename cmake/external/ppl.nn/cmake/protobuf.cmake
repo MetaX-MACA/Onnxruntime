@@ -1,0 +1,30 @@
+# import protobuf required by onnx proto
+FetchContent_GetProperties(protobuf)
+if(NOT protobuf_POPULATED)
+    if(CMAKE_COMPILER_IS_GNUCC)
+        if(CMAKE_CXX_FLAGS MATCHES "-Werror=non-virtual-dtor")
+            set(__err_non_virtual_dtor__ True)
+            string(REPLACE "-Werror=non-virtual-dtor" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+        else()
+            set(__err_non_virtual_dtor__ False)
+        endif()
+    endif()
+
+    FetchContent_Populate(protobuf)
+    add_subdirectory(${protobuf_SOURCE_DIR}/cmake ${protobuf_BINARY_DIR})
+
+    if(CMAKE_COMPILER_IS_GNUCC)
+        if(__err_non_virtual_dtor__)
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=non-virtual-dtor")
+        endif()
+
+        set(__PPLNN_PROTOBUF_COMPILE_FLAGS__ "-Wno-sign-compare -Wno-unused-variable -Wno-unused-function -Wno-uninitialized")
+        set_target_properties(libprotobuf PROPERTIES COMPILE_FLAGS ${__PPLNN_PROTOBUF_COMPILE_FLAGS__})
+        set_target_properties(libprotobuf-lite PROPERTIES COMPILE_FLAGS ${__PPLNN_PROTOBUF_COMPILE_FLAGS__})
+        set_target_properties(protoc PROPERTIES COMPILE_FLAGS ${__PPLNN_PROTOBUF_COMPILE_FLAGS__})
+        set_target_properties(libprotoc PROPERTIES COMPILE_FLAGS ${__PPLNN_PROTOBUF_COMPILE_FLAGS__})
+        unset(__PPLNN_PROTOBUF_COMPILE_FLAGS__)
+    endif()
+
+    unset(__err_non_virtual_dtor__)
+endif()

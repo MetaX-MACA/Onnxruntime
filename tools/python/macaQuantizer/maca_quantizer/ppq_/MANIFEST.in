@@ -1,0 +1,6 @@
+include ppq/parser/caffe/*
+include ppq/csrc/cuda/*
+include ppq/csrc/build/readme.md
+include ppq/csrc/cpu/*
+include ppq/csrc/export.cc
+include requirements.txt

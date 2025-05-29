@@ -1,0 +1,7 @@
+The following files may have been Modified by MetaX Integrated Circuits (Shanghai) Co., Ltd. in 2024. 
+
+src/ppl/common/tensor_shape.h 
+src/ppl/common/types.h
+src/ppl/common/cuda/conv_param.h
+src/ppl/common/log.h
+src/ppl/common/file_mapping.cc

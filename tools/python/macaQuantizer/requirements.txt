@@ -1,0 +1,8 @@
+numpy
+onnx >= 1.11
+protobuf<=3.23
+tqdm
+argparse
+addict
+pyyaml
+opencv-python

@@ -1,0 +1,5 @@
+FetchContent_GetProperties(onnx)
+if(NOT onnx_POPULATED)
+    FetchContent_Populate(onnx)
+    add_subdirectory(${onnx_SOURCE_DIR} ${onnx_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()

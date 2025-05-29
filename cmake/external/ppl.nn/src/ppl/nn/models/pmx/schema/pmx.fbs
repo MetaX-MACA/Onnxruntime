@@ -1,0 +1,82 @@
+include "types.fbs";
+
+namespace ppl.nn.pmx;
+
+file_identifier "OPMX";
+
+table Edge {
+    name: string;
+}
+
+table NodeType {
+    domain: string;
+    name: string;
+    version: uint32;
+}
+
+table Node {
+    name: string;
+    type: NodeType;
+    inputs: [uint32];
+    outputs: [uint32];
+    extra_inputs: [uint32];
+}
+
+table GraphTopo {
+    name: string;
+    edges: [Edge];
+    nodes: [Node];
+    constants: [uint32];
+    inputs: [uint32];
+    outputs: [uint32];
+    extra_inputs: [uint32];
+}
+
+table NodeInfo {
+    node_id: uint32;
+    data: [ubyte];
+}
+
+table Constant {
+    edge_id: uint32;
+    flags: uint32;
+    data_offset: uint64;
+    data_bytes: uint64;
+}
+
+table Shape {
+    edge_id: uint32;
+    data_type: DataType;
+    data_format: DataFormat;
+    dims: [int64];
+}
+
+table Partition {
+    engine_id: uint32;
+    nodes: [NodeInfo];
+    constants: [Constant];
+}
+
+table GraphData {
+    shapes: [Shape];
+    partitions: [Partition];
+    shared_data: [ubyte];
+}
+
+table Graph {
+    topo: GraphTopo;
+    data: GraphData;
+}
+
+table Engine {
+    name: string;
+    data: [ubyte];
+}
+
+table Model {
+    version: uint32;
+    engines: [Engine];
+    graph: Graph;
+}
+
+root_type Model;

@@ -1,0 +1,74 @@
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
+#ifndef _ST_HPC_PPL_NN_ENGINES_X86_ENGINE_H_
+#define _ST_HPC_PPL_NN_ENGINES_X86_ENGINE_H_
+
+#include "ppl/nn/engines/engine_impl.h"
+#include "ppl/nn/engines/x86/x86_device.h"
+#include "ppl/nn/engines/x86/engine_options.h"
+#include "ppl/nn/engines/x86/engine_config.h"
+
+namespace ppl { namespace nn { namespace x86 {
+
+class X86Engine final : public EngineImpl {
+public:
+    X86Engine();
+    ppl::common::RetCode Init(const EngineOptions&);
+    ppl::common::RetCode Configure(uint32_t, ...) override;
+    EngineContext* CreateEngineContext() override;
+    bool Supports(const ir::Node*) const override;
+    ppl::common::RetCode ProcessGraph(const utils::SharedResource&, ir::Graph*, RuntimePartitionInfo*) override;
+    EngineImpl* Create() override;
+
+#ifdef PPLNN_ENABLE_PMX_MODEL
+    ppl::common::RetCode LoadConstants(const ConstantVisitor&, std::map<edgeid_t, BufferInfo>*) override;
+    OptKernel* CreateOptKernel(const ir::Node*) const override;
+    ppl::common::RetCode SerializeData(const pmx::SerializationContext&, utils::DataStream*) const override {
+        return ppl::common::RC_UNSUPPORTED;
+    }
+    ppl::common::RetCode DeserializeData(const void*, uint64_t) override {
+        return ppl::common::RC_UNSUPPORTED;
+    }
+#endif
+
+private:
+    ppl::common::RetCode DoOptimize(const utils::SharedResource&, ir::Graph*, RuntimePartitionInfo*);
+    ppl::common::RetCode CalDataOmittedConstants(const ir::Graph&, const RuntimePartitionInfo&,
+                                                 std::set<edgeid_t>*) const;
+
+private:
+    /*
+     * some of them may visit class members.
+     * defined as member functions can avoid exporting unnecessary APIs
+     */
+    static ppl::common::RetCode SetGraphFusion(X86Engine*, va_list);
+    static ppl::common::RetCode SetTenosrDebug(X86Engine*, va_list);
+    static ppl::common::RetCode SetDebugDataDir(X86Engine*, va_list);
+
+    typedef ppl::common::RetCode (*ConfHandlerFunc)(X86Engine*, va_list);
+    static ConfHandlerFunc conf_handlers_[ENGINE_CONF_MAX];
+
+private:
+    X86Device device_;
+    EngineOptions options_;
+    EngineConfig config_;
+};
+
+}}} // namespace ppl::nn::x86
+
+#endif
